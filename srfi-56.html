@@ -4,6 +4,123 @@
   <head>
     <meta name="keywords" content="Scheme, programming language, SRFI, #f">
     <title>SRFI-56: Binary I/O</title>
+    <style type="text/css">
+           /* Style taken directly from SRFI-1:
+            *   http://srfi.schemers.org/srfi-1/srfi-1.html
+            */
+
+	   /* A little general layout hackery for headers & the title. */
+           body { margin-left: +7%;
+	          font-family: "Helvetica", sans-serif;
+		  }
+           /* Netscape workaround: */
+	   td, th { font-family: "Helvetica", sans-serif; }
+
+	   code, pre { font-family: "courier new", "courier"; }
+
+           h1 { margin-left: -5%; }
+	   h1, h2 { clear: both; }
+	   h1, h2, h3, h4, h5, h6 { color: blue }
+	   div.title-text { font-size: large; font-weight: bold; }
+
+	   div.indent { margin-left: 2em; }	  /* General indentation */
+	   pre.code-example { margin-left: 2em; } /* Indent code examples. */
+	   pre.biblio { font-family: "Helvetica", sans-serif; }
+
+	   /* This stuff is for definition lists of defined procedures.
+           ** A proc-def2 is used when you want a stack of procs to go
+	   ** with one <dd> ... </dd> body. In this case, make the first
+	   ** proc a proc-def1, following ones proc-defi's, and the last one
+           ** a proc-defn.
+           **
+           ** Unfortunately, Netscape has huge bugs with respect to style
+           ** sheets and dl list rendering. We have to set truly random
+           ** values here to get the rendering to come out. The proper values
+           ** are in the following style sheet, for Internet Explorer.
+	   ** In the following settings, the *comments* say what the 
+           ** setting *really* causes Netscape to do.
+	   **
+           ** Ugh. Professional coders sacrifice their self-respect,
+           ** that others may live.
+           */
+	   /* m-t ignored; m-b sets top margin space. */
+	   dt.proc-def1 { margin-top: 0ex; margin-bottom: 3ex; }
+	   dt.proc-defi { margin-top: 0ex; margin-bottom: 0ex; }
+	   dt.proc-defn { margin-top: 0ex; margin-bottom: 0ex; }
+
+	   /* m-t works weird depending on whether or not the last line
+           ** of the previous entry was a pre. Set to zero.
+           */
+	   dt.proc-def  { margin-top: 0ex; margin-bottom: 3ex; }
+
+	   /* m-b sets space between dd & dt; m-t ignored. */
+	   dd.proc-def { margin-bottom: 0.5ex; margin-top: 0ex; } 
+
+
+	   /* Boldface the name of a procedure when it's being defined. */
+	   code.proc-def { font-weight: bold; font-size: 110%}
+
+	   /* For the index of procedures. 
+           ** Same hackery as for dt.proc-def, above.
+           */
+	   /* m-b sets space between dd & dt; m-t ignored. */
+	   dd.proc-index  { margin-bottom: 0ex; margin-top: 0ex; } 
+	   /* What the fuck? */
+	   pre.proc-index { margin-top: -2ex; }
+
+	   /* Pull the table of contents back flush with the margin.
+	   ** Both NS & IE screw this up in different ways.
+	   */
+	   #toc-table { margin-top: -2ex; margin-left: -5%; }
+
+	   /* R5RS proc names are in italic; extended R5RS names 
+           ** in italic boldface.
+	   */
+	   span.r5rs-proc { font-weight: bold; }
+	   span.r5rs-procx { font-style: italic; font-weight: bold; }
+
+	   /* Spread out bibliographic lists. */
+	   /* More Netscape-specific lossage; see the following stylesheet
+	   ** for the proper values (used by IE).
+           */
+	   dt.biblio { margin-bottom: 1ex; }
+
+	   /* Links to draft copies (e.g., not at the official SRFI site)
+	   ** are colored in red, so people will use them during the 
+	   ** development process and kill them when the document's done.
+	   */
+           a.draft { color: red; }
+    </style>
+
+    <style type="text/css"; media=all>
+	   /* Nastiness: Here, I'm using a bug to work around a bug.
+	   ** Netscape rendering bugs mean you need bogus <dt> and <dd>
+	   ** margin settings -- settings which screw up IE's proper rendering.
+	   ** Fortunately, Netscape has *another* bug: it will ignore this
+	   ** media=all style sheet. So I am placing the (proper) IE values
+	   ** here. Perhaps, one day, when these rendering bugs are fixed,
+	   ** this gross hackery can be removed.
+	   */
+	   dt.proc-def1 { margin-top: 3ex; margin-bottom: 0ex; }
+	   dt.proc-defi { margin-top: 0ex; margin-bottom: 0ex; }
+	   dt.proc-defn { margin-top: 0ex; margin-bottom: 0.5ex; }
+	   dt.proc-def  { margin-top: 3ex; margin-bottom: 0.5ex; }
+
+	   pre { margin-top: 1ex; }
+
+	   dd.proc-def { margin-bottom: 2ex; margin-top: 0.5ex; } 
+
+	   /* For the index of procedures. 
+           ** Same hackery as for dt.proc-def, above.
+           */
+	   dd.proc-index { margin-top: 0ex; } 
+	   pre.proc-index { margin-top: 0ex; }
+
+	   /* Spread out bibliographic lists. */
+	   dt.biblio { margin-top: 3ex; margin-bottom: 0ex; }
+	   dd.biblio { margin-bottom: 1ex; }
+    </style>
+
   </head>
 
 <body>
@@ -29,8 +146,8 @@ SRFI-56:    Binary I/O
       <LI>Received: 2004
       <LI>Draft: 2004/06/14-2004/09/14
     </UL>
-    
-<H1>Abstract</H1>
+
+<h1><a name="Abstract">Abstract</a></h1>
 
 <p>
   This SRFI extends Scheme with procedures to read and write binary data
@@ -79,7 +196,6 @@ SRFI-56:    Binary I/O
 <li><a href="#Issues">Issues</a></li>
 <li><a href="#Rationale">Rationale</a></li>
 <li><a href="#Specification">Specification</a></li>
-<li><a href="#String-Ports">String Ports</a></li>
 <li><a href="#Library-Procedures">Library Procedures</a></li>
 <ul>
   <li><a href="#Library_2dProcedures_Endianness">Endianness</a></li>
@@ -108,6 +224,54 @@ SRFI-56:    Binary I/O
 <p>
 
 <p>
+<h1>Procedure Index</h1>
+<ul id="procedure-index">
+<li><a href="#proc-read-byte">read-byte</a></li>
+<li><a href="#proc-write-byte">write-byte</a></li>
+<li><a href="#proc-peek-byte">peek-byte</a></li>
+<li><a href="#proc-byte-ready_3f">byte-ready?</a></li>
+<li><a href="#proc-default-endian">default-endian</a></li>
+<li><a href="#proc-read-binary-uint">read-binary-uint</a></li>
+<li><a href="#proc-read-binary-sint">read-binary-sint</a></li>
+<li><a href="#proc-read-binary-uint8">read-binary-uint8</a></li>
+<li><a href="#proc-read-binary-uint16">read-binary-uint16</a></li>
+<li><a href="#proc-read-binary-uint32">read-binary-uint32</a></li>
+<li><a href="#proc-read-binary-uint64">read-binary-uint64</a></li>
+<li><a href="#proc-read-binary-sint8">read-binary-sint8</a></li>
+<li><a href="#proc-read-binary-sint16">read-binary-sint16</a></li>
+<li><a href="#proc-read-binary-sint32">read-binary-sint32</a></li>
+<li><a href="#proc-read-binary-sint64">read-binary-sint64</a></li>
+<li><a href="#proc-write-binary-uint">write-binary-uint</a></li>
+<li><a href="#proc-write-binary-sint">write-binary-sint</a></li>
+<li><a href="#proc-write-binary-uint8">write-binary-uint8</a></li>
+<li><a href="#proc-write-binary-uint16">write-binary-uint16</a></li>
+<li><a href="#proc-write-binary-uint32">write-binary-uint32</a></li>
+<li><a href="#proc-write-binary-uint64">write-binary-uint64</a></li>
+<li><a href="#proc-write-binary-sint8">write-binary-sint8</a></li>
+<li><a href="#proc-write-binary-sint16">write-binary-sint16</a></li>
+<li><a href="#proc-write-binary-sint32">write-binary-sint32</a></li>
+<li><a href="#proc-write-binary-sint64">write-binary-sint64</a></li>
+<li><a href="#proc-read-network-uint16">read-network-uint16</a></li>
+<li><a href="#proc-read-network-uint32">read-network-uint32</a></li>
+<li><a href="#proc-read-network-uint64">read-network-uint64</a></li>
+<li><a href="#proc-read-network-sint16">read-network-sint16</a></li>
+<li><a href="#proc-read-network-sint32">read-network-sint32</a></li>
+<li><a href="#proc-read-network-sint64">read-network-sint64</a></li>
+<li><a href="#proc-write-network-uint16">write-network-uint16</a></li>
+<li><a href="#proc-write-network-uint32">write-network-uint32</a></li>
+<li><a href="#proc-write-network-uint64">write-network-uint64</a></li>
+<li><a href="#proc-write-network-sint16">write-network-sint16</a></li>
+<li><a href="#proc-write-network-sint32">write-network-sint32</a></li>
+<li><a href="#proc-write-network-sint64">write-network-sint64</a></li>
+<li><a href="#proc-read-ber-integer">read-ber-integer</a></li>
+<li><a href="#proc-write-ber-integer">write-ber-integer</a></li>
+<li><a href="#proc-default-float-endian">default-float-endian</a></li>
+<li><a href="#proc-read-ieee-float32">read-ieee-float32</a></li>
+<li><a href="#proc-read-ieee-float64">read-ieee-float64</a></li>
+<li><a href="#proc-write-ieee-float32">write-ieee-float32</a></li>
+<li><a href="#proc-write-ieee-float64">write-ieee-float64</a></li>
+</ul>
+
 <h1><a name="Specification">Specification</a></h1>
 
 <p>
@@ -116,7 +280,7 @@ SRFI-56:    Binary I/O
 <p>
 <dt class="proc-def"><code class="proc-def">read-byte</code> <var>[port]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-byte</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-byte</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
 <dt class="proc-def"><code class="proc-def">peek-byte</code> <var>[port]</var>
 <dd class="proc-def"></dd>
@@ -193,20 +357,6 @@ SRFI-56:    Binary I/O
 
 
 <p>
-<h1><a name="String-Ports">String Ports</a></h1>
-
-<p>
-  Writing binary data to a SRFI-6 string-port is complicated due to the
-  possibility of creating invalid octet sequences.  It is recommended
-  that Schemes allow writing valid sequences in the native byte-encoding
-  in order to implement character encoding system conversion libraries.
-  Writing raw binary data is undefined.  It is hoped that future SRFIs
-  will provide more flexible port types, which in cases like these could
-  possibly be backed with uniform vectors rather than strings.
-
-<p>
-
-<p>
 <h1><a name="Library-Procedures">Library Procedures</a></h1>
 
 <p>
@@ -217,11 +367,10 @@ SRFI-56:    Binary I/O
   them at a lower level.
 
 <p>
-  Procedures below are denoted with a bullet (*) followed by the
-  procedure name and any parameters.  Parameters in [ brackets ] are
-  optional and may be omitted <b>or</b> passed a value of #f to revert to the
-  default value.  The default value of an input port is always the
-  result of (current-input-port) and of an output port is
+  Procedures are described below with their parameter lists.  Parameters
+  in [ brackets ] are optional and may be omitted <b>or</b> passed a value of
+  #f to revert to the default value.  The default value of an input port
+  is always the result of (current-input-port) and of an output port is
   (current-output-port).
 
 <p>
@@ -242,7 +391,7 @@ SRFI-56:    Binary I/O
   the procedure:
 
 <p>
-<dt class="proc-def"><code class="proc-def">default-endian</code> <var></var>
+<dt class="proc-def"><code class="proc-def">default-endian</code> 
 <dd class="proc-def"></dd>
 
 <p>
@@ -251,7 +400,7 @@ SRFI-56:    Binary I/O
 <h2><a name="Library_2dProcedures_General-Reading">General Reading</a></h2>
 
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-uint</code> <var>size</var>
+<dt class="proc-def"><code class="proc-def">read-binary-uint</code> <var>size</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -261,7 +410,7 @@ SRFI-56:    Binary I/O
   port return the eof-object.
 
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-sint</code> <var>size</var>
+<dt class="proc-def"><code class="proc-def">read-binary-sint</code> <var>size</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -304,13 +453,13 @@ SRFI-56:    Binary I/O
   you hand code them to the appropriate size.
 
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-uint8</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-uint8</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint16</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-uint16</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint32</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-uint32</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint64</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-uint64</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -318,13 +467,13 @@ SRFI-56:    Binary I/O
   using the corresponding numeric suffix of the procedure name as SIZE.
 
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-sint8</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-sint8</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint16</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-sint16</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint32</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-sint32</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint64</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-binary-sint64</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -337,7 +486,7 @@ SRFI-56:    Binary I/O
 <h2><a name="Library_2dProcedures_General-Writing">General Writing</a></h2>
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-uint</code> <var>size</var>
+<dt class="proc-def"><code class="proc-def">write-binary-uint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -346,7 +495,7 @@ SRFI-56:    Binary I/O
   local architecture).
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-sint</code> <var>size</var>
+<dt class="proc-def"><code class="proc-def">write-binary-sint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -360,13 +509,13 @@ SRFI-56:    Binary I/O
 <h2><a name="Library_2dProcedures_Predefined-Write-Sizes">Predefined Write Sizes</a></h2>
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-uint8</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-uint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint16</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-uint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint32</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-uint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint64</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-uint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -374,13 +523,13 @@ SRFI-56:    Binary I/O
   corresponding numeric suffix of the procedure name as SIZE.
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-sint8</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-sint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint16</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-sint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint32</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-sint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint64</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-binary-sint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -415,19 +564,19 @@ SRFI-56:    Binary I/O
 <dd class="proc-def"></dd>
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-network-uint16</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-uint16</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-uint32</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-uint32</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-uint64</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-uint64</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-network-sint16</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-sint16</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-sint32</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-sint32</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-sint64</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-network-sint64</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -468,7 +617,7 @@ SRFI-56:    Binary I/O
   without the high bit set (i.e. less than 128) are found.
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-ber-integer</code> <var>int</var>
+<dt class="proc-def"><code class="proc-def">write-ber-integer</code> <var>int</var> <var>[port]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -495,7 +644,7 @@ SRFI-56:    Binary I/O
   numbers.
 
 <p>
-<dt class="proc-def"><code class="proc-def">default-float-endian</code> <var></var>
+<dt class="proc-def"><code class="proc-def">default-float-endian</code> 
 <dd class="proc-def"></dd>
 
 <p>
@@ -503,9 +652,9 @@ SRFI-56:    Binary I/O
   symbol, using the same symbol names as above for integer endians.
 
 <p>
-<dt class="proc-def"><code class="proc-def">read-ieee-float32</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-ieee-float32</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-ieee-float64</code> <var>[port]</var>
+<dt class="proc-def"><code class="proc-def">read-ieee-float64</code> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -519,9 +668,9 @@ SRFI-56:    Binary I/O
   for the IEEE defined bit patterns on read-ieee-float.
 
 <p>
-<dt class="proc-def"><code class="proc-def">write-ieee-float32</code> <var>real</var>
+<dt class="proc-def"><code class="proc-def">write-ieee-float32</code> <var>real</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-ieee-float64</code> <var>real</var>
+<dt class="proc-def"><code class="proc-def">write-ieee-float64</code> <var>real</var> <var>[port]</var> <var>[endian]</var>
 <dd class="proc-def"></dd>
 
 <p>
@@ -542,14 +691,14 @@ SRFI-56:    Binary I/O
 <p>
   The reference implementation is available at
 <pre class="code-example">
-    <a href="http://srfi.schemers.org/srfi-??/binary-io.scm">http://srfi.schemers.org/srfi-??/binary-io.scm</a>
+    <a href="http://srfi.schemers.org/srfi-56/srfi-56.scm">http://srfi.schemers.org/srfi-56/srfi-56.scm</a>
 </pre>
   and has been placed under an open BSD-style license.
 
 <p>
   A corresponding test suite can be found at
 <pre class="code-example">
-    <a href="http://srfi.schemers.org/srfi-??/test-binary-io.scm">http://srfi.schemers.org/srfi-??/test-binary-io.scm</a>
+    <a href="http://srfi.schemers.org/srfi-56/test-srfi-56.scm">http://srfi.schemers.org/srfi-56/test-srfi-56.scm</a>
 </pre>
 
 
@@ -750,4 +899,3 @@ PURPOSE.
 
 </body>
 </html>
-
