@@ -26,6 +26,16 @@
     (if (eof-object? c) c (char->integer c))))
 (define byte-ready? char-ready?)
 
+;; don't differentiate between binary and character ports
+(define binary-port? port?)
+(define character-port? port?)
+(define open-binary-input-file open-input-file)
+(define open-binary-output-file open-output-file)
+(define call-with-binary-input-file call-with-input-file)
+(define call-with-binary-output-file call-with-output-file)
+(define with-input-from-binary-file with-input-from-file)
+(define with-output-to-binary-file with-output-to-file)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; bitwise operators
 
@@ -369,6 +379,7 @@
            (else (reverse (bytes)))))))
 
 (define (write-ieee-float64 num . opt)
+
   (assert (real? num))
   (let-params* opt ((port (current-output-port))
                     (endian *default-float-endian*))
@@ -393,7 +404,7 @@
            ((eq? endian 'big-endian) (bytes))
            (else (reverse (bytes)))))))
 
-
+
 ;;; Copyright (c) 2004 by Alex Shinn. All rights reserved.
 ;;; 
 ;;; Redistribution and use in source and binary forms, with or without
@@ -417,4 +428,3 @@
 ;;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 ;;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 ;;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-

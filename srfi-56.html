@@ -153,7 +153,8 @@ SRFI-56:    Binary I/O
   This SRFI extends Scheme with procedures to read and write binary data
   to and from ports, including utility procedures for writing various
   integer and floating point values in both big and little endian
-  formats.
+  formats.  Predicates are provided to test if binary I/O is allowed on
+  a port, along with new procedures for creating such ports.
 
 <p>
 
@@ -162,18 +163,12 @@ SRFI-56:    Binary I/O
 
 <p>
   SRFI-36 provides the optional I/O Conditions used in the procedures
-  below.  The reference implementation uses portable SRFI-33 bitwise
-  procedures.
+  below.
 
 <p>
 
 <p>
 <h1><a name="Issues">Issues</a></h1>
-
-<p>
-  Some Schemes may wish to distinguish between binary and non-binary
-  ports as in Common-Lisp.  As these can be layered on top of the
-  current ports this may better be relegated to a separate SRFI.
 
 <p>
   Currently only standard big-endian and little-endian byte layouts are
@@ -196,6 +191,10 @@ SRFI-56:    Binary I/O
 <li><a href="#Issues">Issues</a></li>
 <li><a href="#Rationale">Rationale</a></li>
 <li><a href="#Specification">Specification</a></li>
+<ul>
+  <li><a href="#Specification_Port-Extensions">Port Extensions</a></li>
+  <li><a href="#Specification_I_2fO-Extensions">I/O Extensions</a></li>
+</ul>
 <li><a href="#Library-Procedures">Library Procedures</a></li>
 <ul>
   <li><a href="#Library_2dProcedures_Endianness">Endianness</a></li>
@@ -216,16 +215,25 @@ SRFI-56:    Binary I/O
 <h1><a name="Rationale">Rationale</a></h1>
 
 <p>
-  R5RS provides no portable means of reading or writing binary data,
-  which is a prerequisite for handling binary data formats, implementing
-  databases, creating encoding conversion libraries, among other uses
-  typically required of programming languages.
+  R5RS implicitly provides access only to character I/O ports, with no
+  portable means of reading or writing binary data, which is a
+  prerequisite for handling binary data formats, implementing databases,
+  creating encoding conversion libraries, among other uses typically
+  required of programming languages.
 
 <p>
 
 <p>
 <h1>Procedure Index</h1>
 <ul id="procedure-index">
+<li><a href="#proc-binary-port_3f">binary-port?</a></li>
+<li><a href="#proc-character-port_3f">character-port?</a></li>
+<li><a href="#proc-open-binary-input-file">open-binary-input-file</a></li>
+<li><a href="#proc-open-binary-output-file">open-binary-output-file</a></li>
+<li><a href="#proc-call-with-binary-input-file">call-with-binary-input-file</a></li>
+<li><a href="#proc-call-with-binary-output-file">call-with-binary-output-file</a></li>
+<li><a href="#proc-with-input-from-binary-file">with-input-from-binary-file</a></li>
+<li><a href="#proc-with-output-to-binary-file">with-output-to-binary-file</a></li>
 <li><a href="#proc-read-byte">read-byte</a></li>
 <li><a href="#proc-write-byte">write-byte</a></li>
 <li><a href="#proc-peek-byte">peek-byte</a></li>
@@ -275,7 +283,82 @@ SRFI-56:    Binary I/O
 <h1><a name="Specification">Specification</a></h1>
 
 <p>
-  We extend Scheme with four new I/O primitives:
+<h2><a name="Specification_Port-Extensions">Port Extensions</a></h2>
+
+<p>
+  We extend Scheme with the following two predicates to test for allowed
+  operations on a port:
+
+<p>
+<dt class="proc-def"><code class="proc-def">binary-port?</code> <var>obj</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">character-port?</code> <var>obj</var>
+<dd class="proc-def"></dd>
+
+<p>
+  These predicates return #t if OBJ allows binary or character port
+  operations respectively, and #f otherwise.  Much like INPUT-PORT? and
+  OUTPUT-PORT? these predicate are not necessarily disjoint.
+
+<p>
+  Character port operations are the input and output operations
+  specified in R5RS: READ, READ-CHAR, PEEK-CHAR, CHAR-READY?, WRITE,
+  DISPLAY, NEWLINE and WRITE-CHAR, plus library procedures that can be
+  defined in terms of these.  It is an error to use a character port
+  operation on a port for which CHARACTER-PORT? return #f.
+
+<p>
+  Existing R5RS procedures that instantiate ports are implicitly
+  character ports, including OPEN-INPUT-FILE, OPEN-OUTPUT-FILE,
+  CALL-WITH-INPUT-FILE, CALL-WITH-OUTPUT-FILE, WITH-INPUT-FROM-FILE,
+  WITH-OUTPUT-TO-FILE, and extensions thereof.
+
+<p>
+  The following six new analogous procedures may be used to instantiate
+  ports for which BINARY-PORT? is #t:
+
+<p>
+<dt class="proc-def"><code class="proc-def">open-binary-input-file</code> <var>path</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">open-binary-output-file</code> <var>path</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">call-with-binary-input-file</code> <var>path</var> <var>proc</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">call-with-binary-output-file</code> <var>path</var> <var>proc</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">with-input-from-binary-file</code> <var>path</var> <var>thunk</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">with-output-to-binary-file</code> <var>path</var> <var>thunk</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Even if an implementation makes no distinction between binary and
+  character ports, it is recommended that for portability and to more
+  clearly document usage, that if using exclusively binary operations on
+  a port you use one of the above forms.
+
+<p>
+  Assuming no filesystem errors, the following hold:
+
+<p>
+<pre class="code-example">
+    (call-with-input-file &lt;file&gt; character-port?)          =&gt;  #t
+    (call-with-input-file &lt;file&gt; binary-port?)             =&gt;  <u>unspecified</u>
+    (call-with-binary-input-file &lt;file&gt; character-port?)   =&gt;  <u>unspecified</u>
+    (call-with-binary-input-file &lt;file&gt; binary-port?)      =&gt;  #t
+</pre>
+
+
+  Both binary and character ports may be input and/or output ports, so
+  the existing CLOSE-INPUT-PORT and CLOSE-OUTPUT-PORT work as expected
+  on all ports.
+
+<p>
+<h2><a name="Specification_I_2fO-Extensions">I/O Extensions</a></h2>
+
+<p>
+  Binary port operations are defined in terms of the following four new
+  procedures:
 
 <p>
 <dt class="proc-def"><code class="proc-def">read-byte</code> <var>[port]</var>
@@ -288,17 +371,19 @@ SRFI-56:    Binary I/O
 <dd class="proc-def"></dd>
 
 <p>
-  which behave similar to their R5RS -char analogs except that they take
+  These behave similar to their R5RS -char analogs except that they take
   and return integer values representing a single octet from the port.
   Specifically, an octet is 8 bits (one byte), with a resulting range of
   [0-255].  WRITE-BYTE signals an error if not passed an integer within
-  this range.
+  this range.  It is an error to use a binary port operation on a port
+  for which BINARY-PORT? returns #f.
 
 <p>
   For Schemes that use ASCII or any of the single byte encodings
-  (e.g. ISO-8859-*) as the native character encoding, and don't change
-  the integer value of the characters from the native octet value, these
-  new procedures can be defined as follows:
+  (e.g. ISO-8859-*) as the native character encoding, don't change the
+  integer value of the characters from the native octet value, and don't
+  distinguish between binary and character ports, these new procedures
+  could be defined as follows:
 
 <p>
 <pre class="code-example">
@@ -327,20 +412,11 @@ SRFI-56:    Binary I/O
 
 
   Schemes that use multi-byte encodings or don't handle arbitrary octets
-  in I/O ports will have to define these as primitives.  Moreover, in
-  such cases ports can be corrupted by use of these procedures.  Tagging
-  ports as specifically intended for character I/O, binary I/O, or both
-  is beyond the scope of this SRFI.  Instead we recommend that
-  implementations signal an error on any of READ-CHAR, PEEK-CHAR or
-  CHAR-READY? when an invalid byte sequence is detected.
-
-<p>
-  Note that CHAR-READY? should only return #t if a full character value
-  is available.  If the beginning of a valid multiple octet sequence is
-  found but no additional octets are in the input port, then #f is
-  returned and no error is signalled.  BYTE-READY? can be used if you
-  only wish to test the availability of any data regardless of character
-  validity.
+  in I/O ports will have to define these as primitives.  In the presence
+  of multi-byte encodings, with or without binary I/O, character
+  sequences may become corrupted.  When an invalid byte sequence is
+  detected we recommend that implementations signal an error on any of
+  READ-CHAR, PEEK-CHAR or CHAR-READY?.
 
 <p>
   Schemes supporting SRFI-36 I/O Conditions may use the following
@@ -355,6 +431,14 @@ SRFI-56:    Binary I/O
 </pre>
 
 
+  Note that CHAR-READY? should only return #t if a full character value
+  is available.  If the beginning of a valid multiple octet sequence is
+  found but no additional octets are in the input port, then #f is
+  returned and no error is signalled.  BYTE-READY? can be used if you
+  only wish to test the availability of any data regardless of character
+  validity.
+
+<p>
 
 <p>
 <h1><a name="Library-Procedures">Library Procedures</a></h1>
@@ -421,12 +505,12 @@ SRFI-56:    Binary I/O
 <p>
   Schemes are not required to support the full numeric tower, and in
   particular if they do not support bignums they are unlikely to be able
-  to provide the full range of 32-bit values.  In this case care should
-  be taken that when reading values, if the final result fits within the
-  implementation's supported range the value should be read properly.
-  In particular, small negative values should be supported, even though
-  they may first be interpreted as large positive values before twos
-  complement conversion.
+  to provide the full range of machine integer values.  In this case
+  care should be taken that when reading values, if the final result
+  fits within the implementation's supported range the value should be
+  read properly.  In particular, small negative values should be
+  supported, even though they may first be interpreted as large positive
+  values before twos complement conversion.
 
 <p>
   If the resulting integer would not be supported by the Scheme's
@@ -594,7 +678,9 @@ SRFI-56:    Binary I/O
   high bit is set on all but the final (least significant) byte.  Thus
   any size integer can be encoded, but the encoding is efficient and
   small integers don't take up any more space than they would in normal
-  char/short/int encodings.
+  char/short/int encodings.  This is commonly used to encode an
+  unlimited length field, and can form the basis or other variable
+  length encodings.
 
 <p>
   Examples of integers converted to BER byte sequences:
@@ -706,14 +792,6 @@ SRFI-56:    Binary I/O
   Schemes: Bigloo, Chicken, Gauche, Guile, Kawa, MzScheme, SISC.
 
 <p>
-<pre class="code-example">
-    [At time of writing the tests do not all pass for all Schemes,
-    largely do to issues with integer sizes (notably you may need to
-    comment out some of the bignum literals in the test source) and
-    varying floating point precision.]
-</pre>
-
-
   The reference implementation uses only portable R5RS procedures and
   should work unmodified in any compliant Scheme.  The API for a subset
   of SRFI-33 bitwise procedures was used but a portable implementation
@@ -777,10 +855,16 @@ SRFI-56:    Binary I/O
 <h1><a name="Acknowledgements">Acknowledgements</a></h1>
 
 <p>
-  I would like to thank Oleg Kiselyov, Shiro Kawai and David Rush for
-  their help in the pre-draft discussion, and of course all those who
-  provide comments, questions and flames in the upcoming SRFI
-  discussion.
+  I would like to thank all those who have contributed to the design and
+  discussion of this SRFI, both on list and off, including Per Bothner,
+  Thomas Bushnell, Ray Dillinger, Sebastian Egner, Dale Jordan, Shiro
+  Kawai, Oleg Kiselyov, Dave Mason, Hans Oesterholt-Dijkema, Bradd
+  W. Szonye and Felix Winkelmann.  A special thanks goes to David Rush,
+  the editor of this SRFI.
+
+<p>
+  This is not to imply that these individuals necessarily endorse the
+  final results, of course.
 
 <p>
 
@@ -846,6 +930,7 @@ SRFI-56:    Binary I/O
       (BER), Canonical Encoding Rules (CER) and Distinguished Encoding
       Rules (DER), February, 2002.
       <a href="http://www.itu.int/ITU-T/studygroups/com17/languages/">http://www.itu.int/ITU-T/studygroups/com17/languages/</a>.
+      <a href="http://luca.ntop.org/Teaching/Appunti/asn1.html">http://luca.ntop.org/Teaching/Appunti/asn1.html</a>.
 </pre>
 
 
