@@ -1,0 +1,753 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+  'http://www.w3.org/TR/REC-html40/strict.dtd'>
+<html lang=en-US>
+  <head>
+    <meta name="keywords" content="Scheme, programming language, SRFI, #f">
+    <title>SRFI-56: Binary I/O</title>
+  </head>
+
+<body>
+    <H1>Title</H1>
+SRFI-56:    Binary I/O
+    
+    <H1>Author</H1>
+    Alex Shinn
+    
+    <H1>Status</H1>
+    
+    This SRFI is currently in ``draft'' status.  To see an explanation
+    of each status that a SRFI can hold, see
+    <A HREF="http://srfi.schemers.org/srfi-process.html">here</A>.
+    It will remain in draft status until 2004/01/15, or as amended.
+    To provide input on this SRFI, please
+    <CODE><A HREF="mailto:srfi-47@srfi.schemers.org">mail to
+	&lt;srfi-47@srfi.schemers.org&gt;</A></CODE>.  See
+    <A HREF=../srfi-list-subscribe.html>instructions here</A>
+    to subscribe to the list.  You can access previous messages via
+    <A HREF=mail-archive/maillist.html>the archive of the mailing list</A>. 
+    <P><UL>
+      <LI>Received: 2004
+      <LI>Draft: 2004/06/14-2004/09/14
+    </UL>
+    
+<H1>Abstract</H1>
+
+<p>
+  This SRFI extends Scheme with procedures to read and write binary data
+  to and from ports, including utility procedures for writing various
+  integer and floating point values in both big and little endian
+  formats.
+
+<p>
+
+<p>
+<h1><a name="Related-SRFIs">Related SRFIs</a></h1>
+
+<p>
+  SRFI-36 provides the optional I/O Conditions used in the procedures
+  below.  The reference implementation uses portable SRFI-33 bitwise
+  procedures.
+
+<p>
+
+<p>
+<h1><a name="Issues">Issues</a></h1>
+
+<p>
+  Some Schemes may wish to distinguish between binary and non-binary
+  ports as in Common-Lisp.  As these can be layered on top of the
+  current ports this may better be relegated to a separate SRFI.
+
+<p>
+  Currently only standard big-endian and little-endian byte layouts are
+  supported, though the API is forwards compatible with new endian
+  orders.
+
+<p>
+  I'm specifically seeking feedback on library procedure names, and the
+  behavior of library procedures when insufficient input is available.
+
+<p>
+
+<p>
+<h1>Table of Contents</h1>
+<ul id="toc-table">
+<li><a href="#Title">Title</a></li>
+<li><a href="#Author">Author</a></li>
+<li><a href="#Abstract">Abstract</a></li>
+<li><a href="#Related-SRFIs">Related SRFIs</a></li>
+<li><a href="#Issues">Issues</a></li>
+<li><a href="#Rationale">Rationale</a></li>
+<li><a href="#Specification">Specification</a></li>
+<li><a href="#String-Ports">String Ports</a></li>
+<li><a href="#Library-Procedures">Library Procedures</a></li>
+<ul>
+  <li><a href="#Library_2dProcedures_Endianness">Endianness</a></li>
+  <li><a href="#Library_2dProcedures_General-Reading">General Reading</a></li>
+  <li><a href="#Library_2dProcedures_Predefined-Read-Sizes">Predefined Read Sizes</a></li>
+  <li><a href="#Library_2dProcedures_General-Writing">General Writing</a></li>
+  <li><a href="#Library_2dProcedures_Predefined-Write-Sizes">Predefined Write Sizes</a></li>
+  <li><a href="#Library_2dProcedures_Predefined-Network-Encodings">Predefined Network Encodings</a></li>
+  <li><a href="#Library_2dProcedures_Bignum-Encodings">Bignum Encodings</a></li>
+  <li><a href="#Library_2dProcedures_IEEE-Floating-Point-Encodings">IEEE Floating Point Encodings</a></li>
+</ul>
+<li><a href="#Implementation">Implementation</a></li>
+<li><a href="#Optimization">Optimization</a></li>
+<li><a href="#Acknowledgements">Acknowledgements</a></li>
+<li><a href="#References">References</a></li>
+</ul>
+
+<h1><a name="Rationale">Rationale</a></h1>
+
+<p>
+  R5RS provides no portable means of reading or writing binary data,
+  which is a prerequisite for handling binary data formats, implementing
+  databases, creating encoding conversion libraries, among other uses
+  typically required of programming languages.
+
+<p>
+
+<p>
+<h1><a name="Specification">Specification</a></h1>
+
+<p>
+  We extend Scheme with four new I/O primitives:
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-byte</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-byte</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">peek-byte</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">byte-ready?</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+  which behave similar to their R5RS -char analogs except that they take
+  and return integer values representing a single octet from the port.
+  Specifically, an octet is 8 bits (one byte), with a resulting range of
+  [0-255].  WRITE-BYTE signals an error if not passed an integer within
+  this range.
+
+<p>
+  For Schemes that use ASCII or any of the single byte encodings
+  (e.g. ISO-8859-*) as the native character encoding, and don't change
+  the integer value of the characters from the native octet value, these
+  new procedures can be defined as follows:
+
+<p>
+<pre class="code-example">
+    (define (read-byte . opt)
+      (let ((c (apply read-char opt)))
+        (if (eof-object? c) c (char-&gt;integer c))))
+</pre>
+
+
+<pre class="code-example">
+    (define (write-byte int . opt)
+      (apply write-char (integer-&gt;char int) opt))
+</pre>
+
+
+<pre class="code-example">
+    (define (peek-byte . opt)
+      (let ((c (apply peek-char opt)))
+        (if (eof-object? c) c (char-&gt;integer c))))
+</pre>
+
+
+<pre class="code-example">
+    (define byte-ready? char-ready?)
+</pre>
+
+
+  Schemes that use multi-byte encodings or don't handle arbitrary octets
+  in I/O ports will have to define these as primitives.  Moreover, in
+  such cases ports can be corrupted by use of these procedures.  Tagging
+  ports as specifically intended for character I/O, binary I/O, or both
+  is beyond the scope of this SRFI.  Instead we recommend that
+  implementations signal an error on any of READ-CHAR, PEEK-CHAR or
+  CHAR-READY? when an invalid byte sequence is detected.
+
+<p>
+  Note that CHAR-READY? should only return #t if a full character value
+  is available.  If the beginning of a valid multiple octet sequence is
+  found but no additional octets are in the input port, then #f is
+  returned and no error is signalled.  BYTE-READY? can be used if you
+  only wish to test the availability of any data regardless of character
+  validity.
+
+<p>
+  Schemes supporting SRFI-36 I/O Conditions may use the following
+  condition for the case of an invalid encoding sequence:
+
+<p>
+<pre class="code-example">
+   (define-condition-type &amp;i/o-encoding-error &amp;i/o-read-error
+     i/o-encoding-error?
+     (byte-sequence i/o-error-byte-sequence)
+     (encoding i/o-error-encoding))
+</pre>
+
+
+
+<p>
+<h1><a name="String-Ports">String Ports</a></h1>
+
+<p>
+  Writing binary data to a SRFI-6 string-port is complicated due to the
+  possibility of creating invalid octet sequences.  It is recommended
+  that Schemes allow writing valid sequences in the native byte-encoding
+  in order to implement character encoding system conversion libraries.
+  Writing raw binary data is undefined.  It is hoped that future SRFIs
+  will provide more flexible port types, which in cases like these could
+  possibly be backed with uniform vectors rather than strings.
+
+<p>
+
+<p>
+<h1><a name="Library-Procedures">Library Procedures</a></h1>
+
+<p>
+  The above extensions are sufficient to handle all forms of binary I/O,
+  however are very low-level.  We also provide the following 40 library
+  procedures, which can be defined in terms of the above, although
+  Schemes concerned about efficiency will probably wish to implement
+  them at a lower level.
+
+<p>
+  Procedures below are denoted with a bullet (*) followed by the
+  procedure name and any parameters.  Parameters in [ brackets ] are
+  optional and may be omitted <b>or</b> passed a value of #f to revert to the
+  default value.  The default value of an input port is always the
+  result of (current-input-port) and of an output port is
+  (current-output-port).
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_Endianness">Endianness</a></h2>
+
+<p>
+  Most of the procedures below accept an optional ENDIAN parameter,
+  which is a symbol defined to be either 'big-endian or 'little-endian.
+  This interface allows for future addition of endian types such as
+  'middle-endian-3412 where needed, though this SRFI does not define
+  them.
+
+<p>
+  When not given the ENDIAN parameter defaults to the appropriate value
+  for the current system's architecture.  This value can be queried with
+  the procedure:
+
+<p>
+<dt class="proc-def"><code class="proc-def">default-endian</code> <var></var>
+<dd class="proc-def"></dd>
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_General-Reading">General Reading</a></h2>
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-binary-uint</code> <var>size</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Read an unsigned integer of SIZE octets from PORT (default
+  current-input-port) with endianness ENDIAN (default to that of the
+  local architecture).  If fewer than SIZE octets are available in the
+  port return the eof-object.
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-binary-sint</code> <var>size</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Read a signed integer in twos complement form of SIZE octets from PORT
+  (default current-input-port) with endianness ENDIAN (default to that
+  of the local architecture).
+
+<p>
+  Schemes are not required to support the full numeric tower, and in
+  particular if they do not support bignums they are unlikely to be able
+  to provide the full range of 32-bit values.  In this case care should
+  be taken that when reading values, if the final result fits within the
+  implementation's supported range the value should be read properly.
+  In particular, small negative values should be supported, even though
+  they may first be interpreted as large positive values before twos
+  complement conversion.
+
+<p>
+  If the resulting integer would not be supported by the Scheme's
+  numeric range then the result should be the same as when an arithmetic
+  operation produces an result outside the supported range, such as
+  signalling and error or causing overflow.
+
+<p>
+  Schemes that choose to use optimization strategies that limit their
+  numeric range would be free to provide read procedures returning
+  disjoint types.  For instance, Bigloo could provide a
+  read-binary-elong procedure to read an elong object (a Bigloo hardware
+  integer).
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_Predefined-Read-Sizes">Predefined Read Sizes</a></h2>
+
+<p>
+  We provide the following predefined read sizes.  Although the
+  reference implementation defines them in terms of the general
+  read-binary-uint above, significant performance gains are possible if
+  you hand code them to the appropriate size.
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-binary-uint8</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-uint16</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-uint32</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-uint64</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Read and return an unsigned binary integer as in read-binary-uint,
+  using the corresponding numeric suffix of the procedure name as SIZE.
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-binary-sint8</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-sint16</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-sint32</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-binary-sint64</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Read and return a signed binary integer as in read-binary-sint, using
+  the corresponding numeric suffix of the procedure name as SIZE.
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_General-Writing">General Writing</a></h2>
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-binary-uint</code> <var>size</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Write unsigned integer INT of SIZE octets to PORT (default
+  current-input-port) with endianness ENDIAN (default to that of the
+  local architecture).
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-binary-sint</code> <var>size</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Write signed integer INT of SIZE octets to PORT (default
+  current-input-port) with endianness ENDIAN (default to that of the
+  local architecture) in twos complement form.
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_Predefined-Write-Sizes">Predefined Write Sizes</a></h2>
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-binary-uint8</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-uint16</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-uint32</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-uint64</code> <var>int</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Write an unsigned binary integer as in write-binary-uint, using the
+  corresponding numeric suffix of the procedure name as SIZE.
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-binary-sint8</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-sint16</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-sint32</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-binary-sint64</code> <var>int</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Write a signed binary integer as in write-binary-sint, using the
+  corresponding numeric suffix of the procedure name as SIZE.
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_Predefined-Network-Encodings">Predefined Network Encodings</a></h2>
+
+<p>
+  For portability between different architectures it can be useful to
+  use the standard "network" byte encoding (big-endian).  On big-endian
+  architectures these can simply be aliases for the general versions
+  above.
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-network-uint16</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-network-uint32</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-network-uint64</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-network-sint16</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-network-sint32</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-network-sint64</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-network-uint16</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-network-uint32</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-network-uint64</code> <var>int</var>
+<dd class="proc-def"></dd>
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-network-sint16</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-network-sint32</code> <var>int</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-network-sint64</code> <var>int</var>
+<dd class="proc-def"></dd>
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_Bignum-Encodings">Bignum Encodings</a></h2>
+
+<p>
+  Since Schemes may support unlimited size bignums it is useful to
+  support the binary encoding of such values.
+
+<p>
+  A BER (Basic Encoding Rules from X.690) compressed integer is an
+  unsigned integer in base 128, most significant digit first, where the
+  high bit is set on all but the final (least significant) byte.  Thus
+  any size integer can be encoded, but the encoding is efficient and
+  small integers don't take up any more space than they would in normal
+  char/short/int encodings.
+
+<p>
+  Examples of integers converted to BER byte sequences:
+
+<p>
+<pre class="code-example">
+            3 =&gt; #x03
+          555 =&gt; #x84 #x2B
+    123456789 =&gt; #xBA #xEF #x9A #x15
+</pre>
+
+
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-ber-integer</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Reads and returns an exact integer, or the eof-object if no bytes
+  without the high bit set (i.e. less than 128) are found.
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-ber-integer</code> <var>int</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Writes INT to the specified output port in BER format.  Signals an
+  error if INT is not a positive integer.
+
+<p>
+
+<p>
+<h2><a name="Library_2dProcedures_IEEE-Floating-Point-Encodings">IEEE Floating Point Encodings</a></h2>
+
+<p>
+  Floating point binary formats are much more complicated than simple
+  two's complement integer formats, typically divided into a sign bit,
+  exponent field and mantissa field, optionally using a hidden bit and
+  different rounding behavior.  Because of this we do not define general
+  purpose floating point operations but simply provide the most common
+  formats, IEEE-754 single and double precision floats.
+
+<p>
+  On some architectures floating point is handled by a separate
+  co-processor and is not guaranteed to use the same endian as integer
+  values.  We therefore use a separate default endian for floating point
+  numbers.
+
+<p>
+<dt class="proc-def"><code class="proc-def">default-float-endian</code> <var></var>
+<dd class="proc-def"></dd>
+
+<p>
+  Returns the default endianness used for floating point procedures as a
+  symbol, using the same symbol names as above for integer endians.
+
+<p>
+<dt class="proc-def"><code class="proc-def">read-ieee-float32</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">read-ieee-float64</code> <var>[port]</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Reads an IEEE float, single or double precision respectively, from
+  PORT in the given ENDIAN, and returns the corresponding inexact real
+  value, or the eof-object if insufficient data is present.
+
+<p>
+  If the Scheme implementation supports +/- Infinity or NaN, as IEEE
+  floats or otherwise, the Scheme implementation may return these values
+  for the IEEE defined bit patterns on read-ieee-float.
+
+<p>
+<dt class="proc-def"><code class="proc-def">write-ieee-float32</code> <var>real</var>
+<dd class="proc-def"></dd>
+<dt class="proc-def"><code class="proc-def">write-ieee-float64</code> <var>real</var>
+<dd class="proc-def"></dd>
+
+<p>
+  Write REAL to PORT in the given ENDIAN using IEEE floating point
+  representation, single or double precision respectively.  Signals an
+  error if REAL is not a real value.
+
+<p>
+  If the Scheme implementation supports +/- Infinity or NaN, as IEEE
+  floats or otherwise, the Scheme implementation may accept these values
+  for REAL and write the corresponding IEEE defined bit patterns.
+
+<p>
+
+<p>
+<h1><a name="Implementation">Implementation</a></h1>
+
+<p>
+  The reference implementation is available at
+<pre class="code-example">
+    <a href="http://srfi.schemers.org/srfi-??/binary-io.scm">http://srfi.schemers.org/srfi-??/binary-io.scm</a>
+</pre>
+  and has been placed under an open BSD-style license.
+
+<p>
+  A corresponding test suite can be found at
+<pre class="code-example">
+    <a href="http://srfi.schemers.org/srfi-??/test-binary-io.scm">http://srfi.schemers.org/srfi-??/test-binary-io.scm</a>
+</pre>
+
+
+  The reference implementation has been tested with the following
+  Schemes: Bigloo, Chicken, Gauche, Guile, Kawa, MzScheme, SISC.
+
+<p>
+<pre class="code-example">
+    [At time of writing the tests do not all pass for all Schemes,
+    largely do to issues with integer sizes (notably you may need to
+    comment out some of the bignum literals in the test source) and
+    varying floating point precision.]
+</pre>
+
+
+  The reference implementation uses only portable R5RS procedures and
+  should work unmodified in any compliant Scheme.  The API for a subset
+  of SRFI-33 bitwise procedures was used but a portable implementation
+  of these procedures included in the source itself, so the Scheme need
+  not support SRFI-33 natively.
+
+<p>
+  Care has been taken that intermediate values remain smaller than the
+  final result, so that Schemes with limited numeric ranges will still
+  read and write properly the values they do support.
+
+<p>
+  The default endian for both integers and floating point numbers is set
+  to 'little-endian at the start of the file, which is correct for x86
+  platforms.  Most other architectures are 'big-endian and will need to
+  be changed accordingly.
+
+<p>
+
+<p>
+<h1><a name="Optimization">Optimization</a></h1>
+
+<p>
+  The fastest implementations will of course be native (C or otherwise
+  compiled), especially for the floating point operations.  However,
+  because it is fairly extensive, as well as tested and portable, many
+  Schemes will choose to use some or all of the reference implementation
+  directly.  In this case the following optimizations can be made:
+
+<p>
+<ol>
+<li>Use native equivalents of the SRFI-33 bitwise operators instead of
+      the portable versions.  At the very least the SLIB portable
+      versions are likely to be better optimized.
+
+<p>
+<li>Make read-byte and write-byte native.
+
+<p>
+<li>Drop the asserts.
+
+<p>
+<li>Specialize the predefined size procedures rather than define them
+      in terms of the more general operations.
+
+<p>
+<li>Check the high bytes to determine if the end result fits within
+      the Schemes native fixnum range, and use specialized fixnum
+      operations in that case.  See the code in Oleg's TIFF library
+      <a href="#ref-OLEG1">OLEG1</a>.
+
+<p>
+  I have not done any benchmarking but I suspect that in most cases the
+  bottleneck is likely to be I/O rather than CPU, and extensive
+  optimization (beyond 1 and 2 above) may not be worth the effort.
+
+<p>
+
+<p>
+</ol>
+<h1><a name="Acknowledgements">Acknowledgements</a></h1>
+
+<p>
+  I would like to thank Oleg Kiselyov, Shiro Kawai and David Rush for
+  their help in the pre-draft discussion, and of course all those who
+  provide comments, questions and flames in the upcoming SRFI
+  discussion.
+
+<p>
+
+<p>
+<h1><a name="References">References</a></h1>
+
+<p>
+
+<p>
+<dl>
+<dt class="biblio"><a name="ref-R5RS"><strong>R5RS</strong></a>
+<dd>
+<pre class="biblio">
+      R. Kelsey, W. Clinger, J. Rees (eds.), Revised^5 Report on the
+      Algorithmic Language Scheme, Higher-Order and Symbolic
+      Computation, 11(1), September, 1998 and ACM SIGPLAN Notices,
+      33(9), October, 1998.
+      <a href="http://www.schemers.org/Documents/Standards/R5RS/">http://www.schemers.org/Documents/Standards/R5RS/</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-CommonLisp"><strong>CommonLisp</strong></a>
+<dd>
+<pre class="biblio">
+      Common Lisp: the Language
+      Guy L. Steele Jr. (editor).
+      Digital Press, Maynard, Mass., second edition 1990.
+      <a href="http://www.elwood.com/alu/table/references.htm#cltl2">http://www.elwood.com/alu/table/references.htm#cltl2</a>.
+      <a href="http://www.harlequin.com/education/books/HyperSpec/">http://www.harlequin.com/education/books/HyperSpec/</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-ISO-C"><strong>ISO-C</strong></a>
+<dd>
+<pre class="biblio">
+      ISO Standard C ISO/IEC 9899:1999
+      <a href="http://www.sics.se/~pd/ISO-C-FDIS.1999-04.pdf">http://www.sics.se/~pd/ISO-C-FDIS.1999-04.pdf</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-HOLY"><strong>HOLY</strong></a>
+<dd>
+<pre class="biblio">
+      ON HOLY WARS AND A PLEA FOR PEACE
+      Danny Cohen, IEN 137, April 1980.
+      <a href="http://www.networksorcery.com/enp/ien/ien137.txt">http://www.networksorcery.com/enp/ien/ien137.txt</a>.
+      <a href="http://www.isi.edu/in-notes/ien/ien137.txt">http://www.isi.edu/in-notes/ien/ien137.txt</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-IEEE-754"><strong>IEEE-754</strong></a>
+<dd>
+<pre class="biblio">
+      Various IEEE-754 references and a calculator in JavaScript.
+      <a href="http://babbage.cs.qc.edu/courses/cs341/IEEE-754references.html">http://babbage.cs.qc.edu/courses/cs341/IEEE-754references.html</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-X_2e690"><strong>X.690</strong></a>
+<dd>
+<pre class="biblio">
+      ASN.1 encoding rules: Specification of Basic Encoding Rules
+      (BER), Canonical Encoding Rules (CER) and Distinguished Encoding
+      Rules (DER), February, 2002.
+      <a href="http://www.itu.int/ITU-T/studygroups/com17/languages/">http://www.itu.int/ITU-T/studygroups/com17/languages/</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-OLEG1"><strong>OLEG1</strong></a>
+<dd>
+<pre class="biblio">
+      Various binary parsing utilities for Scheme.
+      <a href="http://okmij.org/ftp/Scheme/binary-io.html">http://okmij.org/ftp/Scheme/binary-io.html</a>.
+</pre>
+
+
+<dt class="biblio"><a name="ref-OLEG2"><strong>OLEG2</strong></a>
+<dd>
+<pre class="biblio">
+      Oleg Kiselyov, Reading IEEE binary floats in R5RS Scheme.
+      Article from comp.lang.scheme, on 8 March, 2000,
+      Message-ID: &lt;8a4h56$oqu$1@nnrp1.deja.com&gt;.
+      <a href="http://okmij.org/ftp/Scheme/reading-IEEE-floats.txt">http://okmij.org/ftp/Scheme/reading-IEEE-floats.txt</a>.
+</pre>
+</dl>
+
+<h1>Copyright</h1>
+
+<p>Copyright (C) Alex Shinn 2004. All Rights Reserved.
+
+<p>
+This document and translations of it may be copied and furnished to
+others, and derivative works that comment on or otherwise explain it or
+assist in its implementation may be prepared, copied, published and
+distributed, in whole or in part, without restriction of any kind,
+provided that the above copyright notice and this paragraph are included
+on all such copies and derivative works.  However, this document itself
+may not be modified in any way, such as by removing the copyright notice
+or references to the Scheme Request For Implementation process or
+editors, except as needed for the purpose of developing SRFIs in which
+case the procedures for copyrights defined in the SRFI process must be
+followed, or as required to translate it into languages other than
+English.
+
+<p>
+The limited permissions granted above are perpetual and will not be
+revoked by the authors or their successors or assigns.
+
+<p>
+This document and the information contained herein is provided on an "AS
+IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL WARRANTIES,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE
+USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY
+IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+PURPOSE.
+
+</body>
+</html>
+
