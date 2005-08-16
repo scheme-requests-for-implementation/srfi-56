@@ -3,7 +3,7 @@
 <html lang=en-US>
   <head>
     <meta name="keywords" content="Scheme, programming language, SRFI, #f">
-    <title>SRFI-56: Binary I/O</title>
+    <title>SRFI 56: Binary I/O</title>
     <style type="text/css">
            /* Style taken directly from SRFI-1:
             *   http://srfi.schemers.org/srfi-1/srfi-1.html
@@ -27,22 +27,6 @@
 	   pre.code-example { margin-left: 2em; } /* Indent code examples. */
 	   pre.biblio { font-family: "Helvetica", sans-serif; }
 
-	   /* This stuff is for definition lists of defined procedures.
-           ** A proc-def2 is used when you want a stack of procs to go
-	   ** with one <dd> ... </dd> body. In this case, make the first
-	   ** proc a proc-def1, following ones proc-defi's, and the last one
-           ** a proc-defn.
-           **
-           ** Unfortunately, Netscape has huge bugs with respect to style
-           ** sheets and dl list rendering. We have to set truly random
-           ** values here to get the rendering to come out. The proper values
-           ** are in the following style sheet, for Internet Explorer.
-	   ** In the following settings, the *comments* say what the 
-           ** setting *really* causes Netscape to do.
-	   **
-           ** Ugh. Professional coders sacrifice their self-respect,
-           ** that others may live.
-           */
 	   /* m-t ignored; m-b sets top margin space. */
 	   dt.proc-def1 { margin-top: 0ex; margin-bottom: 3ex; }
 	   dt.proc-defi { margin-top: 0ex; margin-bottom: 0ex; }
@@ -92,15 +76,7 @@
            a.draft { color: red; }
     </style>
 
-    <style type="text/css"; media=all>
-	   /* Nastiness: Here, I'm using a bug to work around a bug.
-	   ** Netscape rendering bugs mean you need bogus <dt> and <dd>
-	   ** margin settings -- settings which screw up IE's proper rendering.
-	   ** Fortunately, Netscape has *another* bug: it will ignore this
-	   ** media=all style sheet. So I am placing the (proper) IE values
-	   ** here. Perhaps, one day, when these rendering bugs are fixed,
-	   ** this gross hackery can be removed.
-	   */
+    <style type="text/css" media=all>
 	   dt.proc-def1 { margin-top: 3ex; margin-bottom: 0ex; }
 	   dt.proc-defi { margin-top: 0ex; margin-bottom: 0ex; }
 	   dt.proc-defn { margin-top: 0ex; margin-bottom: 0.5ex; }
@@ -124,71 +100,51 @@
   </head>
 
 <body>
-    <H1>Title</H1>
-SRFI-56:    Binary I/O
+<a name="Title"><H1>Title</H1></a>
+<div class="title-text">
+<p>
+  Binary I/O
+</div>
+<a name="Author"><H1>Author</H1></a>
+<p>Alex Shinn
+<p>
+<H1>Status</H1>
     
-    <H1>Author</H1>
-    Alex Shinn
-    
-    <H1>Status</H1>
-    
-    This SRFI is currently in ``draft'' status.  To see an explanation
-    of each status that a SRFI can hold, see
-    <A HREF="http://srfi.schemers.org/srfi-process.html">here</A>.
-    It will remain in draft status until 2004/09/14, or as amended.
-    To provide input on this SRFI, please
-    <CODE><A HREF="mailto:srfi-56@srfi.schemers.org">mail to
-	&lt;srfi-56@srfi.schemers.org&gt;</A></CODE>.  See
-    <A HREF=../srfi-list-subscribe.html>instructions here</A>
-    to subscribe to the list.  You can access previous messages via
-    <A HREF=mail-archive/maillist.html>the archive of the mailing list</A>. 
-    <P><UL>
-      <LI>Received: 2004
-      <LI>Draft: 2004/06/14-2004/09/14
-    </UL>
+This SRFI is currently in ``draft'' status.  To see an explanation of each
+status that a SRFI can hold, see <a
+HREF="http://srfi.schemers.org/srfi-process.html">here</a>.  It will
+remain in draft status until 2004/09/14, or as amended.  To provide input
+on this SRFI, please <code><a HREF="mailto:srfi-56@srfi.schemers.org">mail
+to &lt;srfi-56@srfi.schemers.org&gt;</a></code>.  See <a
+HREF="../srfi-list-subscribe.html">instructions here</a> to subscribe to
+the list.  You can access previous messages via <a
+HREF="mail-archive/maillist.html">the archive of the mailing list</a>.
 
-<h1><a name="Abstract">Abstract</a></h1>
+<p>
+<ul>
+<li>Received: 2004</li>
+<li>Draft: 2004/06/14-2004/09/14</li>
+<li>Revised: <a
+href="http://srfi.schemers.org/cgi-bin/viewcvs.cgi/*checkout*/srfi/srfi-56/srfi-56.html?rev=1.2">2004/06/17</a></li>
+<li>Revised: <a
+href="http://srfi.schemers.org/cgi-bin/viewcvs.cgi/*checkout*/srfi/srfi-56/srfi-56.html?rev=1.3">2004/11/10</a></li>
+<li>Revised: <a
+href="http://srfi.schemers.org/cgi-bin/viewcvs.cgi/*checkout*/srfi/srfi-56/srfi-56.html?rev=1.4">2005/08/16</a></li>
+</ul>
 
+<H1><a name="Abstract">Abstract</a></H1>
 <p>
   This SRFI extends Scheme with procedures to read and write binary data
   to and from ports, including utility procedures for writing various
   integer and floating point values in both big and little endian
   formats.  Predicates are provided to test if binary I/O is allowed on
   a port, along with new procedures for creating such ports.
-
-<p>
-
-<p>
-<h1><a name="Related-SRFIs">Related SRFIs</a></h1>
-
-<p>
-  SRFI-36 provides the optional I/O Conditions used in the procedures
-  below.
-
-<p>
-
-<p>
-<h1><a name="Issues">Issues</a></h1>
-
-<p>
-  Currently only standard big-endian and little-endian byte layouts are
-  supported, though the API is forwards compatible with new endian
-  orders.
-
-<p>
-  I'm specifically seeking feedback on library procedure names, and the
-  behavior of library procedures when insufficient input is available.
-
-<p>
-
 <p>
 <h1>Table of Contents</h1>
 <ul id="toc-table">
 <li><a href="#Title">Title</a></li>
 <li><a href="#Author">Author</a></li>
 <li><a href="#Abstract">Abstract</a></li>
-<li><a href="#Related-SRFIs">Related SRFIs</a></li>
-<li><a href="#Issues">Issues</a></li>
 <li><a href="#Rationale">Rationale</a></li>
 <li><a href="#Specification">Specification</a></li>
 <ul>
@@ -197,12 +153,14 @@ SRFI-56:    Binary I/O
 </ul>
 <li><a href="#Library-Procedures">Library Procedures</a></li>
 <ul>
+
   <li><a href="#Library_2dProcedures_Endianness">Endianness</a></li>
   <li><a href="#Library_2dProcedures_General-Reading">General Reading</a></li>
   <li><a href="#Library_2dProcedures_Predefined-Read-Sizes">Predefined Read Sizes</a></li>
   <li><a href="#Library_2dProcedures_General-Writing">General Writing</a></li>
   <li><a href="#Library_2dProcedures_Predefined-Write-Sizes">Predefined Write Sizes</a></li>
   <li><a href="#Library_2dProcedures_Predefined-Network-Encodings">Predefined Network Encodings</a></li>
+
   <li><a href="#Library_2dProcedures_Bignum-Encodings">Bignum Encodings</a></li>
   <li><a href="#Library_2dProcedures_IEEE-Floating-Point-Encodings">IEEE Floating Point Encodings</a></li>
 </ul>
@@ -211,135 +169,123 @@ SRFI-56:    Binary I/O
 <li><a href="#Acknowledgements">Acknowledgements</a></li>
 <li><a href="#References">References</a></li>
 </ul>
-
-<h1><a name="Rationale">Rationale</a></h1>
-
+<p>
+<H1><a name="Rationale">Rationale</a></H1>
 <p>
   R5RS implicitly provides access only to character I/O ports, with no
   portable means of reading or writing binary data, which is a
   prerequisite for handling binary data formats, implementing databases,
   creating encoding conversion libraries, among other uses typically
   required of programming languages.
-
-<p>
-
 <p>
 <h1>Procedure Index</h1>
-<ul id="procedure-index">
-<li><a href="#proc-binary-port_3f">binary-port?</a></li>
-<li><a href="#proc-character-port_3f">character-port?</a></li>
-<li><a href="#proc-open-binary-input-file">open-binary-input-file</a></li>
-<li><a href="#proc-open-binary-output-file">open-binary-output-file</a></li>
-<li><a href="#proc-call-with-binary-input-file">call-with-binary-input-file</a></li>
-<li><a href="#proc-call-with-binary-output-file">call-with-binary-output-file</a></li>
-<li><a href="#proc-with-input-from-binary-file">with-input-from-binary-file</a></li>
-<li><a href="#proc-with-output-to-binary-file">with-output-to-binary-file</a></li>
-<li><a href="#proc-read-byte">read-byte</a></li>
-<li><a href="#proc-write-byte">write-byte</a></li>
-<li><a href="#proc-peek-byte">peek-byte</a></li>
-<li><a href="#proc-byte-ready_3f">byte-ready?</a></li>
-<li><a href="#proc-default-endian">default-endian</a></li>
-<li><a href="#proc-read-binary-uint">read-binary-uint</a></li>
-<li><a href="#proc-read-binary-sint">read-binary-sint</a></li>
-<li><a href="#proc-read-binary-uint8">read-binary-uint8</a></li>
-<li><a href="#proc-read-binary-uint16">read-binary-uint16</a></li>
-<li><a href="#proc-read-binary-uint32">read-binary-uint32</a></li>
-<li><a href="#proc-read-binary-uint64">read-binary-uint64</a></li>
-<li><a href="#proc-read-binary-sint8">read-binary-sint8</a></li>
-<li><a href="#proc-read-binary-sint16">read-binary-sint16</a></li>
-<li><a href="#proc-read-binary-sint32">read-binary-sint32</a></li>
-<li><a href="#proc-read-binary-sint64">read-binary-sint64</a></li>
-<li><a href="#proc-write-binary-uint">write-binary-uint</a></li>
-<li><a href="#proc-write-binary-sint">write-binary-sint</a></li>
-<li><a href="#proc-write-binary-uint8">write-binary-uint8</a></li>
-<li><a href="#proc-write-binary-uint16">write-binary-uint16</a></li>
-<li><a href="#proc-write-binary-uint32">write-binary-uint32</a></li>
-<li><a href="#proc-write-binary-uint64">write-binary-uint64</a></li>
-<li><a href="#proc-write-binary-sint8">write-binary-sint8</a></li>
-<li><a href="#proc-write-binary-sint16">write-binary-sint16</a></li>
-<li><a href="#proc-write-binary-sint32">write-binary-sint32</a></li>
-<li><a href="#proc-write-binary-sint64">write-binary-sint64</a></li>
-<li><a href="#proc-read-network-uint16">read-network-uint16</a></li>
-<li><a href="#proc-read-network-uint32">read-network-uint32</a></li>
-<li><a href="#proc-read-network-uint64">read-network-uint64</a></li>
-<li><a href="#proc-read-network-sint16">read-network-sint16</a></li>
-<li><a href="#proc-read-network-sint32">read-network-sint32</a></li>
-<li><a href="#proc-read-network-sint64">read-network-sint64</a></li>
-<li><a href="#proc-write-network-uint16">write-network-uint16</a></li>
-<li><a href="#proc-write-network-uint32">write-network-uint32</a></li>
-<li><a href="#proc-write-network-uint64">write-network-uint64</a></li>
-<li><a href="#proc-write-network-sint16">write-network-sint16</a></li>
-<li><a href="#proc-write-network-sint32">write-network-sint32</a></li>
-<li><a href="#proc-write-network-sint64">write-network-sint64</a></li>
-<li><a href="#proc-read-ber-integer">read-ber-integer</a></li>
-<li><a href="#proc-write-ber-integer">write-ber-integer</a></li>
-<li><a href="#proc-default-float-endian">default-float-endian</a></li>
-<li><a href="#proc-read-ieee-float32">read-ieee-float32</a></li>
-<li><a href="#proc-read-ieee-float64">read-ieee-float64</a></li>
-<li><a href="#proc-write-ieee-float32">write-ieee-float32</a></li>
-<li><a href="#proc-write-ieee-float64">write-ieee-float64</a></li>
-</ul>
+<dl>
 
-<h1><a name="Specification">Specification</a></h1>
+<dt class=proc-index>Port Extensions</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-binary-port_3f">binary-port?</a> <a href="#proc-character-port_3f">character-port?</a>
+<a href="#proc-open-binary-input-file">open-binary-input-file</a> <a href="#proc-open-binary-output-file">open-binary-output-file</a>
+<a href="#proc-call-with-binary-input-file">call-with-binary-input-file</a> <a href="#proc-call-with-binary-output-file">call-with-binary-output-file</a>
+<a href="#proc-with-input-from-binary-file">with-input-from-binary-file</a> <a href="#proc-with-output-to-binary-file">with-output-to-binary-file</a>
+</pre></dd>
 
+<dt class=proc-index>I/O Extensions</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-read-byte">read-byte</a> <a href="#proc-write-byte">write-byte</a> <a href="#proc-peek-byte">peek-byte</a> <a href="#proc-byte-ready_3f">byte-ready?</a>
+</pre></dd>
+
+<dt class=proc-index>Endian Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-default-endian">default-endian</a> <a href="#proc-default-float-endian">default-float-endian</a>
+</pre></dd>
+
+<dt class=proc-index>Fixed Read Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-read-binary-uint">read-binary-uint</a> <a href="#proc-read-binary-sint">read-binary-sint</a>
+<a href="#proc-read-binary-uint8">read-binary-uint8</a> <a href="#proc-read-binary-uint16">read-binary-uint16</a>
+<a href="#proc-read-binary-uint32">read-binary-uint32</a> <a href="#proc-read-binary-uint64">read-binary-uint64</a>
+<a href="#proc-read-binary-sint8">read-binary-sint8</a> <a href="#proc-read-binary-sint16">read-binary-sint16</a>
+<a href="#proc-read-binary-sint32">read-binary-sint32</a> <a href="#proc-read-binary-sint64">read-binary-sint64</a>
+</pre></dd>
+
+<dt class=proc-index>Fixed Write Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-write-binary-uint">write-binary-uint</a> <a href="#proc-write-binary-sint">write-binary-sint</a>
+<a href="#proc-write-binary-uint8">write-binary-uint8</a> <a href="#proc-write-binary-uint16">write-binary-uint16</a>
+<a href="#proc-write-binary-uint32">write-binary-uint32</a> <a href="#proc-write-binary-uint64">write-binary-uint64</a>
+<a href="#proc-write-binary-sint8">write-binary-sint8</a> <a href="#proc-write-binary-sint16">write-binary-sint16</a>
+<a href="#proc-write-binary-sint32">write-binary-sint32</a> <a href="#proc-write-binary-sint64">write-binary-sint64</a>
+</pre></dd>
+
+<dt class=proc-index>Network Endian Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-read-network-uint16">read-network-uint16</a> <a href="#proc-read-network-uint32">read-network-uint32</a> <a href="#proc-read-network-uint64">read-network-uint64</a>
+<a href="#proc-read-network-sint16">read-network-sint16</a> <a href="#proc-read-network-sint32">read-network-sint32</a> <a href="#proc-read-network-sint64">read-network-sint64</a>
+<a href="#proc-write-network-uint16">write-network-uint16</a> <a href="#proc-write-network-uint32">write-network-uint32</a> <a href="#proc-write-network-uint64">write-network-uint64</a>
+<a href="#proc-write-network-sint16">write-network-sint16</a> <a href="#proc-write-network-sint32">write-network-sint32</a> <a href="#proc-write-network-sint64">write-network-sint64</a>
+</pre></dd>
+
+<dt class=proc-index>Bignum Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-read-ber-integer">read-ber-integer</a> <a href="#proc-write-ber-integer">write-ber-integer</a>
+</pre></dd>
+
+<dt class=proc-index>IEEE Floating Point Procedures</dt>
+<dd class=proc-index>
+<pre class=proc-index>
+<a href="#proc-read-ieee-float32">read-ieee-float32</a> <a href="#proc-read-ieee-float64">read-ieee-float64</a>
+<a href="#proc-write-ieee-float32">write-ieee-float32</a> <a href="#proc-write-ieee-float64">write-ieee-float64</a>
+</pre></dd>
+</dl>
+
+<H1><a name="Specification">Specification</a></H1>
 <p>
 <h2><a name="Specification_Port-Extensions">Port Extensions</a></h2>
-
 <p>
   We extend Scheme with the following two predicates to test for allowed
   operations on a port:
-
 <p>
-<dt class="proc-def"><code class="proc-def">binary-port?</code> <var>obj</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">character-port?</code> <var>obj</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-binary-port_3f"><code class="proc-def">binary-port?</code> <var>obj</var></a><br>
+<a name="proc-character-port_3f"><code class="proc-def">character-port?</code> <var>obj</var></a><br>
 <p>
   These predicates return #t if OBJ allows binary or character port
   operations respectively, and #f otherwise.  Much like INPUT-PORT? and
-  OUTPUT-PORT? these predicate are not necessarily disjoint.
-
+  OUTPUT-PORT? these predicates are not necessarily disjoint.
 <p>
   Character port operations are the input and output operations
   specified in R5RS: READ, READ-CHAR, PEEK-CHAR, CHAR-READY?, WRITE,
   DISPLAY, NEWLINE and WRITE-CHAR, plus library procedures that can be
   defined in terms of these.  It is an error to use a character port
-  operation on a port for which CHARACTER-PORT? return #f.
-
+  operation on a port for which CHARACTER-PORT? returns #f.
 <p>
   Existing R5RS procedures that instantiate ports are implicitly
   character ports, including OPEN-INPUT-FILE, OPEN-OUTPUT-FILE,
   CALL-WITH-INPUT-FILE, CALL-WITH-OUTPUT-FILE, WITH-INPUT-FROM-FILE,
   WITH-OUTPUT-TO-FILE, and extensions thereof.
-
 <p>
   The following six new analogous procedures may be used to instantiate
-  ports for which BINARY-PORT? is #t:
-
+  ports for which BINARY-PORT? returns #t:
 <p>
-<dt class="proc-def"><code class="proc-def">open-binary-input-file</code> <var>path</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">open-binary-output-file</code> <var>path</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">call-with-binary-input-file</code> <var>path</var> <var>proc</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">call-with-binary-output-file</code> <var>path</var> <var>proc</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">with-input-from-binary-file</code> <var>path</var> <var>thunk</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">with-output-to-binary-file</code> <var>path</var> <var>thunk</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-open-binary-input-file"><code class="proc-def">open-binary-input-file</code> <var>path</var></a><br>
+<a name="proc-open-binary-output-file"><code class="proc-def">open-binary-output-file</code> <var>path</var></a><br>
+<a name="proc-call-with-binary-input-file"><code class="proc-def">call-with-binary-input-file</code> <var>path</var> <var>proc</var></a><br>
+<a name="proc-call-with-binary-output-file"><code class="proc-def">call-with-binary-output-file</code> <var>path</var> <var>proc</var></a><br>
+<a name="proc-with-input-from-binary-file"><code class="proc-def">with-input-from-binary-file</code> <var>path</var> <var>thunk</var></a><br>
+<a name="proc-with-output-to-binary-file"><code class="proc-def">with-output-to-binary-file</code> <var>path</var> <var>thunk</var></a><br>
 <p>
   Even if an implementation makes no distinction between binary and
   character ports, it is recommended that for portability and to more
-  clearly document usage, that if using exclusively binary operations on
-  a port you use one of the above forms.
-
+  clearly document intent, when exclusively using binary operations on a
+  port you use one of the above forms.
 <p>
-  Assuming no filesystem errors, the following hold:
-
+  Assuming no file-system errors, the following hold:
 <p>
 <pre class="code-example">
     (call-with-input-file &lt;file&gt; character-port?)          =&gt;  #t
@@ -347,161 +293,101 @@ SRFI-56:    Binary I/O
     (call-with-binary-input-file &lt;file&gt; character-port?)   =&gt;  <u>unspecified</u>
     (call-with-binary-input-file &lt;file&gt; binary-port?)      =&gt;  #t
 </pre>
-
-
   Both binary and character ports may be input and/or output ports, so
   the existing CLOSE-INPUT-PORT and CLOSE-OUTPUT-PORT work as expected
   on all ports.
-
 <p>
 <h2><a name="Specification_I_2fO-Extensions">I/O Extensions</a></h2>
-
 <p>
   Binary port operations are defined in terms of the following four new
   procedures:
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-byte</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-byte</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">peek-byte</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">byte-ready?</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-byte"><code class="proc-def">read-byte</code> <var>[port]</var></a><br>
+<a name="proc-write-byte"><code class="proc-def">write-byte</code> <var>int</var> <var>[port]</var></a><br>
+<a name="proc-peek-byte"><code class="proc-def">peek-byte</code> <var>[port]</var></a><br>
+<a name="proc-byte-ready?"><code class="proc-def">byte-ready?</code> <var>[port]</var></a><br>
 <p>
-  These behave similar to their R5RS -char analogs except that they take
+  These behave similar to their R5RS -CHAR analogs except that they take
   and return integer values representing a single octet from the port.
   Specifically, an octet is 8 bits (one byte), with a resulting range of
-  [0-255].  WRITE-BYTE signals an error if not passed an integer within
-  this range.  It is an error to use a binary port operation on a port
+  [0-255].  It is an error to pass a value outside this range to
+  WRITE-BYTE.  It is an error to use a binary port operation on a port
   for which BINARY-PORT? returns #f.
-
 <p>
-  For Schemes that use ASCII or any of the single byte encodings
+  For implementations that use ASCII or any of the single byte encodings
   (e.g. ISO-8859-*) as the native character encoding, don't change the
   integer value of the characters from the native octet value, and don't
   distinguish between binary and character ports, these new procedures
   could be defined as follows:
-
 <p>
 <pre class="code-example">
     (define (read-byte . opt)
       (let ((c (apply read-char opt)))
         (if (eof-object? c) c (char-&gt;integer c))))
 </pre>
-
-
 <pre class="code-example">
     (define (write-byte int . opt)
       (apply write-char (integer-&gt;char int) opt))
 </pre>
-
-
 <pre class="code-example">
     (define (peek-byte . opt)
       (let ((c (apply peek-char opt)))
         (if (eof-object? c) c (char-&gt;integer c))))
 </pre>
-
-
 <pre class="code-example">
     (define byte-ready? char-ready?)
 </pre>
-
-
   Schemes that use multi-byte encodings or don't handle arbitrary octets
-  in I/O ports will have to define these as primitives.  In the presence
-  of multi-byte encodings, with or without binary I/O, character
-  sequences may become corrupted.  When an invalid byte sequence is
-  detected we recommend that implementations signal an error on any of
-  READ-CHAR, PEEK-CHAR or CHAR-READY?.
-
+  in I/O ports will have to define these as primitives.
 <p>
-  Schemes supporting SRFI-36 I/O Conditions may use the following
-  condition for the case of an invalid encoding sequence:
-
-<p>
-<pre class="code-example">
-   (define-condition-type &amp;i/o-encoding-error &amp;i/o-read-error
-     i/o-encoding-error?
-     (byte-sequence i/o-error-byte-sequence)
-     (encoding i/o-error-encoding))
-</pre>
-
-
   Note that CHAR-READY? should only return #t if a full character value
   is available.  If the beginning of a valid multiple octet sequence is
   found but no additional octets are in the input port, then #f is
-  returned and no error is signalled.  BYTE-READY? can be used if you
-  only wish to test the availability of any data regardless of character
-  validity.
-
-<p>
-
+  returned.  BYTE-READY? can be used if you only wish to test the
+  availability of any data regardless of character validity.
 <p>
 <h1><a name="Library-Procedures">Library Procedures</a></h1>
-
 <p>
   The above extensions are sufficient to handle all forms of binary I/O,
-  however are very low-level.  We also provide the following 40 library
-  procedures, which can be defined in terms of the above, although
-  Schemes concerned about efficiency will probably wish to implement
-  them at a lower level.
-
+  however they are very low-level.  We also provide the following
+  library procedures, which can be defined in terms of the above,
+  although Schemes concerned about efficiency will probably wish to
+  implement them at a lower level.
 <p>
   Procedures are described below with their parameter lists.  Parameters
   in [ brackets ] are optional and may be omitted <b>or</b> passed a value of
   #f to revert to the default value.  The default value of an input port
   is always the result of (current-input-port) and of an output port is
   (current-output-port).
-
-<p>
-
 <p>
 <h2><a name="Library_2dProcedures_Endianness">Endianness</a></h2>
-
 <p>
   Most of the procedures below accept an optional ENDIAN parameter,
   which is a symbol defined to be either 'big-endian or 'little-endian.
   This interface allows for future addition of endian types such as
   'middle-endian-3412 where needed, though this SRFI does not define
   them.
-
 <p>
   When not given the ENDIAN parameter defaults to the appropriate value
   for the current system's architecture.  This value can be queried with
   the procedure:
-
 <p>
-<dt class="proc-def"><code class="proc-def">default-endian</code> 
-<dd class="proc-def"></dd>
-
-<p>
-
+<a name="proc-default-endian"><code class="proc-def">default-endian</code> </a><br>
 <p>
 <h2><a name="Library_2dProcedures_General-Reading">General Reading</a></h2>
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-uint</code> <var>size</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-binary-uint"><code class="proc-def">read-binary-uint</code> <var>size</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Read an unsigned integer of SIZE octets from PORT (default
   current-input-port) with endianness ENDIAN (default to that of the
   local architecture).  If fewer than SIZE octets are available in the
   port return the eof-object.
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-sint</code> <var>size</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-binary-sint"><code class="proc-def">read-binary-sint</code> <var>size</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
-  Read a signed integer in twos complement form of SIZE octets from PORT
-  (default current-input-port) with endianness ENDIAN (default to that
-  of the local architecture).
-
+  Read a signed integer in two's complement form of SIZE octets from
+  PORT (default current-input-port) with endianness ENDIAN (default to
+  that of the local architecture).
 <p>
   Schemes are not required to support the full numeric tower, and in
   particular if they do not support bignums they are unlikely to be able
@@ -510,168 +396,105 @@ SRFI-56:    Binary I/O
   fits within the implementation's supported range the value should be
   read properly.  In particular, small negative values should be
   supported, even though they may first be interpreted as large positive
-  values before twos complement conversion.
-
+  values before two's complement conversion.
 <p>
   If the resulting integer would not be supported by the Scheme's
   numeric range then the result should be the same as when an arithmetic
   operation produces an result outside the supported range, such as
   signalling and error or causing overflow.
-
 <p>
   Schemes that choose to use optimization strategies that limit their
   numeric range would be free to provide read procedures returning
   disjoint types.  For instance, Bigloo could provide a
   read-binary-elong procedure to read an elong object (a Bigloo hardware
   integer).
-
-<p>
-
 <p>
 <h2><a name="Library_2dProcedures_Predefined-Read-Sizes">Predefined Read Sizes</a></h2>
-
 <p>
   We provide the following predefined read sizes.  Although the
   reference implementation defines them in terms of the general
   read-binary-uint above, significant performance gains are possible if
   you hand code them to the appropriate size.
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-uint8</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint16</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint32</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-uint64</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-binary-uint8"><code class="proc-def">read-binary-uint8</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-uint16"><code class="proc-def">read-binary-uint16</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-uint32"><code class="proc-def">read-binary-uint32</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-uint64"><code class="proc-def">read-binary-uint64</code> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Read and return an unsigned binary integer as in read-binary-uint,
-  using the corresponding numeric suffix of the procedure name as SIZE.
-
+  using the corresponding numeric suffix as the number of bits (i.e. 8x
+  the value of SIZE for read-binary-uint).
 <p>
-<dt class="proc-def"><code class="proc-def">read-binary-sint8</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint16</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint32</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-binary-sint64</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-binary-sint8"><code class="proc-def">read-binary-sint8</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-sint16"><code class="proc-def">read-binary-sint16</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-sint32"><code class="proc-def">read-binary-sint32</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-binary-sint64"><code class="proc-def">read-binary-sint64</code> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Read and return a signed binary integer as in read-binary-sint, using
-  the corresponding numeric suffix of the procedure name as SIZE.
-
-<p>
-
+  the corresponding numeric suffix as the number of bits.
 <p>
 <h2><a name="Library_2dProcedures_General-Writing">General Writing</a></h2>
-
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-uint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-binary-uint"><code class="proc-def">write-binary-uint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Write unsigned integer INT of SIZE octets to PORT (default
-  current-input-port) with endianness ENDIAN (default to that of the
+  current-output-port) with endianness ENDIAN (default to that of the
   local architecture).
-
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-sint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-binary-sint"><code class="proc-def">write-binary-sint</code> <var>size</var> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Write signed integer INT of SIZE octets to PORT (default
   current-input-port) with endianness ENDIAN (default to that of the
-  local architecture) in twos complement form.
-
-<p>
-
+  local architecture) in two's complement form.
 <p>
 <h2><a name="Library_2dProcedures_Predefined-Write-Sizes">Predefined Write Sizes</a></h2>
-
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-uint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-uint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-binary-uint8"><code class="proc-def">write-binary-uint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-uint16"><code class="proc-def">write-binary-uint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-uint32"><code class="proc-def">write-binary-uint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-uint64"><code class="proc-def">write-binary-uint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Write an unsigned binary integer as in write-binary-uint, using the
-  corresponding numeric suffix of the procedure name as SIZE.
-
+  corresponding numeric suffix as the number of bits.
 <p>
-<dt class="proc-def"><code class="proc-def">write-binary-sint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-binary-sint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-binary-sint8"><code class="proc-def">write-binary-sint8</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-sint16"><code class="proc-def">write-binary-sint16</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-sint32"><code class="proc-def">write-binary-sint32</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-binary-sint64"><code class="proc-def">write-binary-sint64</code> <var>int</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Write a signed binary integer as in write-binary-sint, using the
-  corresponding numeric suffix of the procedure name as SIZE.
-
+  corresponding numeric suffix as the number of bits.
 <p>
-
+  It is an error to pass an integer which does not fit within
+  SIZE bytes to any of the write procedures.
 <p>
 <h2><a name="Library_2dProcedures_Predefined-Network-Encodings">Predefined Network Encodings</a></h2>
-
 <p>
   For portability between different architectures it can be useful to
   use the standard "network" byte encoding (big-endian).  On big-endian
   architectures these can simply be aliases for the general versions
   above.
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-network-uint16</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-network-uint32</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-network-uint64</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-network-uint16"><code class="proc-def">read-network-uint16</code> <var>[port]</var></a><br>
+<a name="proc-read-network-uint32"><code class="proc-def">read-network-uint32</code> <var>[port]</var></a><br>
+<a name="proc-read-network-uint64"><code class="proc-def">read-network-uint64</code> <var>[port]</var></a><br>
 <p>
-<dt class="proc-def"><code class="proc-def">read-network-sint16</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-network-sint32</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-network-sint64</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-network-sint16"><code class="proc-def">read-network-sint16</code> <var>[port]</var></a><br>
+<a name="proc-read-network-sint32"><code class="proc-def">read-network-sint32</code> <var>[port]</var></a><br>
+<a name="proc-read-network-sint64"><code class="proc-def">read-network-sint64</code> <var>[port]</var></a><br>
 <p>
-<dt class="proc-def"><code class="proc-def">write-network-uint16</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-uint32</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-uint64</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-network-uint16"><code class="proc-def">write-network-uint16</code> <var>int</var> <var>[port]</var></a><br>
+<a name="proc-write-network-uint32"><code class="proc-def">write-network-uint32</code> <var>int</var> <var>[port]</var></a><br>
+<a name="proc-write-network-uint64"><code class="proc-def">write-network-uint64</code> <var>int</var> <var>[port]</var></a><br>
 <p>
-<dt class="proc-def"><code class="proc-def">write-network-sint16</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-sint32</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-network-sint64</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-
-<p>
-
+<a name="proc-write-network-sint16"><code class="proc-def">write-network-sint16</code> <var>int</var> <var>[port]</var></a><br>
+<a name="proc-write-network-sint32"><code class="proc-def">write-network-sint32</code> <var>int</var> <var>[port]</var></a><br>
+<a name="proc-write-network-sint64"><code class="proc-def">write-network-sint64</code> <var>int</var> <var>[port]</var></a><br>
 <p>
 <h2><a name="Library_2dProcedures_Bignum-Encodings">Bignum Encodings</a></h2>
-
 <p>
   Since Schemes may support unlimited size bignums it is useful to
   support the binary encoding of such values.
-
 <p>
   A BER (Basic Encoding Rules from X.690) compressed integer is an
   unsigned integer in base 128, most significant digit first, where the
@@ -679,42 +502,28 @@ SRFI-56:    Binary I/O
   any size integer can be encoded, but the encoding is efficient and
   small integers don't take up any more space than they would in normal
   char/short/int encodings.  This is commonly used to encode an
-  unlimited length field, and can form the basis or other variable
+  unlimited length field, and can form the basis for other variable
   length encodings.
-
 <p>
   Examples of integers converted to BER byte sequences:
-
 <p>
 <pre class="code-example">
             3 =&gt; #x03
           555 =&gt; #x84 #x2B
     123456789 =&gt; #xBA #xEF #x9A #x15
 </pre>
-
-
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-ber-integer</code> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-ber-integer"><code class="proc-def">read-ber-integer</code> <var>[port]</var></a><br>
 <p>
   Reads and returns an exact integer, or the eof-object if no bytes
   without the high bit set (i.e. less than 128) are found.
-
 <p>
-<dt class="proc-def"><code class="proc-def">write-ber-integer</code> <var>int</var> <var>[port]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-ber-integer"><code class="proc-def">write-ber-integer</code> <var>int</var> <var>[port]</var></a><br>
 <p>
-  Writes INT to the specified output port in BER format.  Signals an
-  error if INT is not a positive integer.
-
-<p>
-
+  Writes INT to the specified output port in BER format.  It is an error
+  if INT is not a positive integer.
 <p>
 <h2><a name="Library_2dProcedures_IEEE-Floating-Point-Encodings">IEEE Floating Point Encodings</a></h2>
-
 <p>
   Floating point binary formats are much more complicated than simple
   two's complement integer formats, typically divided into a sign bit,
@@ -722,157 +531,123 @@ SRFI-56:    Binary I/O
   different rounding behavior.  Because of this we do not define general
   purpose floating point operations but simply provide the most common
   formats, IEEE-754 single and double precision floats.
-
 <p>
   On some architectures floating point is handled by a separate
   co-processor and is not guaranteed to use the same endian as integer
   values.  We therefore use a separate default endian for floating point
   numbers.
-
 <p>
-<dt class="proc-def"><code class="proc-def">default-float-endian</code> 
-<dd class="proc-def"></dd>
-
+<a name="proc-default-float-endian"><code class="proc-def">default-float-endian</code> </a><br>
 <p>
   Returns the default endianness used for floating point procedures as a
   symbol, using the same symbol names as above for integer endians.
-
 <p>
-<dt class="proc-def"><code class="proc-def">read-ieee-float32</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">read-ieee-float64</code> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-read-ieee-float32"><code class="proc-def">read-ieee-float32</code> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-read-ieee-float64"><code class="proc-def">read-ieee-float64</code> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Reads an IEEE float, single or double precision respectively, from
   PORT in the given ENDIAN, and returns the corresponding inexact real
   value, or the eof-object if insufficient data is present.
-
 <p>
   If the Scheme implementation supports +/- Infinity or NaN, as IEEE
   floats or otherwise, the Scheme implementation may return these values
   for the IEEE defined bit patterns on read-ieee-float.
-
 <p>
-<dt class="proc-def"><code class="proc-def">write-ieee-float32</code> <var>real</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-<dt class="proc-def"><code class="proc-def">write-ieee-float64</code> <var>real</var> <var>[port]</var> <var>[endian]</var>
-<dd class="proc-def"></dd>
-
+<a name="proc-write-ieee-float32"><code class="proc-def">write-ieee-float32</code> <var>real</var> <var>[port]</var> <var>[endian]</var></a><br>
+<a name="proc-write-ieee-float64"><code class="proc-def">write-ieee-float64</code> <var>real</var> <var>[port]</var> <var>[endian]</var></a><br>
 <p>
   Write REAL to PORT in the given ENDIAN using IEEE floating point
-  representation, single or double precision respectively.  Signals an
+  representation, single or double precision respectively.  It is an
   error if REAL is not a real value.
-
 <p>
   If the Scheme implementation supports +/- Infinity or NaN, as IEEE
   floats or otherwise, the Scheme implementation may accept these values
   for REAL and write the corresponding IEEE defined bit patterns.
-
 <p>
-
-<p>
-<h1><a name="Implementation">Implementation</a></h1>
-
+<H1><a name="Implementation">Implementation</a></H1>
 <p>
   The reference implementation is available at
 <pre class="code-example">
     <a href="http://srfi.schemers.org/srfi-56/srfi-56.scm">http://srfi.schemers.org/srfi-56/srfi-56.scm</a>
 </pre>
-  and has been placed under an open BSD-style license.
-
+  and has been placed under the standard SRFI license.
 <p>
   A corresponding test suite can be found at
 <pre class="code-example">
-    <a href="http://srfi.schemers.org/srfi-56/test-srfi-56.scm">http://srfi.schemers.org/srfi-56/test-srfi-56.scm</a>
+    <a href="http://srfi.schemers.org/srfi-56/srfi-56-test.scm">http://srfi.schemers.org/srfi-56/srfi-56-test.scm</a>
+    <a href="http://srfi.schemers.org/srfi-56/srfi-56-test.dat">http://srfi.schemers.org/srfi-56/srfi-56-test.dat</a>
 </pre>
-
-
   The reference implementation has been tested with the following
-  Schemes: Bigloo, Chicken, Gauche, Guile, Kawa, MzScheme, SISC.
-
+  Schemes: Bigloo, Chez, Chicken, Gambit, Gauche, Guile, Kawa, KSI,
+  MIT-Scheme, MzScheme, RScheme, Scheme48, SISC and Stklos.  The
+  *-float64 code turns out to be a very rigorous stress test for an
+  implementation's numeric code.  At time of writing, Chicken 2.0 (with
+  the optional numbers egg), KSI 3.4.2 and MzScheme (both 200 and 299
+  versions) are currently the only implementations to pass all tests.
+  Petite Chez 6.0a is the next most complete failing 6, followed by
+  Gambit4b14 failing 8.  Any Scheme that implements floating point
+  numbers internally as C floats rather than doubles will be
+  fundamentally unable to pass all *-float64 tests.
 <p>
   The reference implementation uses only portable R5RS procedures and
   should work unmodified in any compliant Scheme.  The API for a subset
-  of SRFI-33 bitwise procedures was used but a portable implementation
+  of SRFI-60 bitwise procedures was used but a portable implementation
   of these procedures included in the source itself, so the Scheme need
-  not support SRFI-33 natively.
-
+  not support SRFI-60 natively.
 <p>
   Care has been taken that intermediate values remain smaller than the
   final result, so that Schemes with limited numeric ranges will still
   read and write properly the values they do support.
-
 <p>
   The default endian for both integers and floating point numbers is set
-  to 'little-endian at the start of the file, which is correct for x86
-  platforms.  Most other architectures are 'big-endian and will need to
-  be changed accordingly.
-
-<p>
-
+  to 'little-endian, which is correct for x86 platforms.  Most other
+  architectures use 'big-endian and will need to be changed accordingly.
 <p>
 <h1><a name="Optimization">Optimization</a></h1>
-
 <p>
   The fastest implementations will of course be native (C or otherwise
   compiled), especially for the floating point operations.  However,
   because it is fairly extensive, as well as tested and portable, many
   Schemes will choose to use some or all of the reference implementation
   directly.  In this case the following optimizations can be made:
-
 <p>
 <ol>
-<li>Use native equivalents of the SRFI-33 bitwise operators instead of
-      the portable versions.  At the very least the SLIB portable
-      versions are likely to be better optimized.
-
+<li>Use native equivalents of the SRFI-60 bitwise operators instead of
+    the portable versions.  At the very least the SLIB portable versions
+    are likely to be better optimized.
+<p>
+<li>Use native equivalents of call-with-mantissa&exponent, such as
+    decode-float from Chez Scheme and Gauche.
 <p>
 <li>Make read-byte and write-byte native.
-
 <p>
 <li>Drop the asserts.
-
 <p>
 <li>Specialize the predefined size procedures rather than define them
       in terms of the more general operations.
-
 <p>
 <li>Check the high bytes to determine if the end result fits within
       the Schemes native fixnum range, and use specialized fixnum
       operations in that case.  See the code in Oleg's TIFF library
       <a href="#ref-OLEG1">OLEG1</a>.
-
 <p>
   I have not done any benchmarking but I suspect that in most cases the
   bottleneck is likely to be I/O rather than CPU, and extensive
   optimization (beyond 1 and 2 above) may not be worth the effort.
-
-<p>
-
-<p>
 </ol>
 <h1><a name="Acknowledgements">Acknowledgements</a></h1>
-
 <p>
   I would like to thank all those who have contributed to the design and
   discussion of this SRFI, both on list and off, including Per Bothner,
   Thomas Bushnell, Ray Dillinger, Sebastian Egner, Dale Jordan, Shiro
-  Kawai, Oleg Kiselyov, Dave Mason, Hans Oesterholt-Dijkema, Bradd
-  W. Szonye and Felix Winkelmann.  A special thanks goes to David Rush,
-  the editor of this SRFI.
-
+  Kawai, Oleg Kiselyov, Dave Mason, Hans Oesterholt-Dijkema, David Rush,
+  Bradd W. Szonye and Felix Winkelmann.  A special thanks goes to David
+  Van Horn, the editor of this SRFI.
 <p>
   This is not to imply that these individuals necessarily endorse the
   final results, of course.
-
-<p>
-
 <p>
 <h1><a name="References">References</a></h1>
-
-<p>
-
 <p>
 <dl>
 <dt class="biblio"><a name="ref-R5RS"><strong>R5RS</strong></a>
@@ -884,8 +659,6 @@ SRFI-56:    Binary I/O
       33(9), October, 1998.
       <a href="http://www.schemers.org/Documents/Standards/R5RS/">http://www.schemers.org/Documents/Standards/R5RS/</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-CommonLisp"><strong>CommonLisp</strong></a>
 <dd>
 <pre class="biblio">
@@ -895,16 +668,12 @@ SRFI-56:    Binary I/O
       <a href="http://www.elwood.com/alu/table/references.htm#cltl2">http://www.elwood.com/alu/table/references.htm#cltl2</a>.
       <a href="http://www.harlequin.com/education/books/HyperSpec/">http://www.harlequin.com/education/books/HyperSpec/</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-ISO-C"><strong>ISO-C</strong></a>
 <dd>
 <pre class="biblio">
       ISO Standard C ISO/IEC 9899:1999
       <a href="http://www.sics.se/~pd/ISO-C-FDIS.1999-04.pdf">http://www.sics.se/~pd/ISO-C-FDIS.1999-04.pdf</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-HOLY"><strong>HOLY</strong></a>
 <dd>
 <pre class="biblio">
@@ -913,16 +682,12 @@ SRFI-56:    Binary I/O
       <a href="http://www.networksorcery.com/enp/ien/ien137.txt">http://www.networksorcery.com/enp/ien/ien137.txt</a>.
       <a href="http://www.isi.edu/in-notes/ien/ien137.txt">http://www.isi.edu/in-notes/ien/ien137.txt</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-IEEE-754"><strong>IEEE-754</strong></a>
 <dd>
 <pre class="biblio">
       Various IEEE-754 references and a calculator in JavaScript.
       <a href="http://babbage.cs.qc.edu/courses/cs341/IEEE-754references.html">http://babbage.cs.qc.edu/courses/cs341/IEEE-754references.html</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-X_2e690"><strong>X.690</strong></a>
 <dd>
 <pre class="biblio">
@@ -932,16 +697,12 @@ SRFI-56:    Binary I/O
       <a href="http://www.itu.int/ITU-T/studygroups/com17/languages/">http://www.itu.int/ITU-T/studygroups/com17/languages/</a>.
       <a href="http://luca.ntop.org/Teaching/Appunti/asn1.html">http://luca.ntop.org/Teaching/Appunti/asn1.html</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-OLEG1"><strong>OLEG1</strong></a>
 <dd>
 <pre class="biblio">
       Various binary parsing utilities for Scheme.
       <a href="http://okmij.org/ftp/Scheme/binary-io.html">http://okmij.org/ftp/Scheme/binary-io.html</a>.
 </pre>
-
-
 <dt class="biblio"><a name="ref-OLEG2"><strong>OLEG2</strong></a>
 <dd>
 <pre class="biblio">
@@ -954,33 +715,34 @@ SRFI-56:    Binary I/O
 
 <h1>Copyright</h1>
 
-<p>Copyright (C) Alex Shinn 2004. All Rights Reserved.
+<p>Copyright (C) Alex Shinn (2005). All Rights Reserved.
 
 <p>
-This document and translations of it may be copied and furnished to
-others, and derivative works that comment on or otherwise explain it or
-assist in its implementation may be prepared, copied, published and
-distributed, in whole or in part, without restriction of any kind,
-provided that the above copyright notice and this paragraph are included
-on all such copies and derivative works.  However, this document itself
-may not be modified in any way, such as by removing the copyright notice
-or references to the Scheme Request For Implementation process or
-editors, except as needed for the purpose of developing SRFIs in which
-case the procedures for copyrights defined in the SRFI process must be
-followed, or as required to translate it into languages other than
-English.
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 <p>
-The limited permissions granted above are perpetual and will not be
-revoked by the authors or their successors or assigns.
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
 <p>
-This document and the information contained herein is provided on an "AS
-IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL WARRANTIES,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE
-USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY
-IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
-PURPOSE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+<hr>
+
+<address>Editor: <a href="mailto:srfi-editors@srfi.schemers.org">David Van Horn</a></address>
+Last modified: Tue Aug 16 10:56:57 EDT 2005
 </body>
 </html>
+
